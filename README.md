@@ -1,0 +1,2 @@
+# NNU_volunteer_blackmagic
+南京师范大学QQ群抢志愿python脚本
