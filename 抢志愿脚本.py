@@ -14,8 +14,9 @@ import re
 
 # 测试表单地址：
 # 金数据1：https://jsj.top/f/p3RiEU
-# 金数据2：企业版问卷，没办法自建
+# 金数据2：https://zsmjxc1m.jsjform.com/f/irJ0VJ
 # 问卷星：https://www.wjx.top/vm/YZjvTpC.aspx#
+# 如果测试表单进不去，可能是链接失效了，可以自己创建一个表单
 
 def geturl():
     """
@@ -136,7 +137,7 @@ def auto_fill_jsjtop(driver, configs):
 def auto_fill_wjx(driver, configs):
     print("\n📌 识别到问卷星链接，开始自动化填写...")
     # 手动定位存放所有项目标题的父节点（你原有的XPath）
-    parent_container_xpath = '/html/body/div[2]/form/div[10]/div[5]/fieldset'
+    parent_container_xpath = '/html/body/div[3]/form/div[10]/div[4]/fieldset'
     parent_container = explicit_find_xpath(driver, parent_container_xpath)
     if not parent_container:
         raise Exception("未找到表单字段容器，请检查父节点XPath")
