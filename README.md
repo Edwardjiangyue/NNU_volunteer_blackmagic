@@ -1,4 +1,3 @@
-```markdown
 # NNU_volunteer_blackmagic
 南京师范大学抢志愿python脚本
 
@@ -33,7 +32,6 @@
 #### （1）安装 Python 依赖
 ```bash
 pip install selenium pyperclip pyyaml
-```
 
 #### （2）配置 ChromeDriver
 1. 查看 Chrome 浏览器版本（设置 → 关于 Chrome）
@@ -96,9 +94,7 @@ python 抢志愿脚本.py
 
 ## 📄 许可证
 本项目仅供学习使用，遵循 MIT 许可证。使用时请遵守相关平台的用户协议，切勿用于商业或违规场景。
-
 ---
 
 如果觉得有用，欢迎 Star 🌟 支持！如有问题或优化建议，可提交 Issue 或 Pull Request~
 笃学敏行，正德厚生
-```
