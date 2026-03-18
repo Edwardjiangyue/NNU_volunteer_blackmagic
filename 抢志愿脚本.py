@@ -13,7 +13,7 @@ import re
 
 
 # 测试表单地址：
-# 金数据1：https://jsj.top/f/p3RiEU
+# 金数据1：https://jsj.top/f/b4cinX
 # 金数据2：https://zsmjxc1m.jsjform.com/f/irJ0VJ
 # 问卷星：https://www.wjx.top/vm/YZjvTpC.aspx#
 # 如果测试表单进不去，可能是链接失效了，可以自己创建一个表单
@@ -65,225 +65,89 @@ def explicit_click_xpath(driver, xpath):
         driver.execute_script("arguments[0].click();", ele)
 
 
-# ---------------------- jsj.top自动化逻辑 ----------------------
-def auto_fill_jsjtop(driver, configs):
-    print("\n📌 识别到金数据链接，开始自动化填写...")
-    # 手动定位存放所有项目标题的父节点（你原有的XPath）
-    parent_container_xpath = '/html/body/div[1]/div/div/form/div[3]/div'
-    parent_container = explicit_find_xpath(driver, parent_container_xpath)
-    if not parent_container:
-        raise Exception("未找到表单字段容器，请检查父节点XPath")
-
-    index = 2  # 起始索引（你原有的逻辑）
+def auto_fill_generic(driver, configs):
+    """
+    严格按你的规则实现：
+    1. 父容器XPath：//div[contains(@class, 'j-field-field_') or contains(@class, 'ant-row ant-form-item-row') or contains(@class, 'ui-field-contain')]
+    2. 父容器文本 = 标题（无需过滤）
+    3. 父容器内找输入框：//input[@type='text' or @type='tel']，无则跳过
+    """
+    print("\n📌 开始通用表单自动化填写...")
     auto_filled_all = True
-    while True:
-        # 定位当前索引的字段容器（如div[2]、div[4]）
-        field_container_xpath = f'{parent_container_xpath}/div[{index}]'
-        field_container = explicit_find_xpath(driver, field_container_xpath)
-        if not field_container:
-            print("\n所有字段已遍历完成")
-            break
 
-        # 提取当前字段的标题（你原有的绝对路径）
-        title_xpath = f'{field_container_xpath}/div/div/div[1]/label/span/div'
-        title_element = explicit_find_xpath(driver, title_xpath)
-        if not title_element:
-            print(f"容器div[{index}]未找到标题，跳过")
-            auto_filled_all = False
-            index += 2
-            continue
-        title_text = title_element.text.strip()
-        if not title_text:
-            print(f"容器div[{index}]标题为空，跳过")
-            auto_filled_all = False
-            index += 2
-            continue
+    # ---------------------- 1. 按你指定的XPath定位所有父容器 ----------------------
+    parent_xpath = "//div[contains(@class, 'j-field-field_') or contains(@class, 'ant-row ant-form-item-row') or contains(@class, 'ui-field-contain')]"
 
-        print(f"\n发现字段：{title_text}（容器索引：{index}）")
-
-        # 双向模糊匹配配置（你原有的匹配逻辑）
-        matched_key = None
-        for config_key in configs:
-            if (title_text in config_key) or (config_key in title_text):
-                matched_key = config_key
-                break
-
-        # 填写逻辑（你原有的输入框定位）
-        if matched_key and configs[matched_key]:
-            input_xpath = f'{field_container_xpath}//input'
-            input_element = explicit_find_xpath(driver, input_xpath)
-            if input_element:
-                input_element.send_keys(configs[matched_key])
-                print(f"✅ 已自动填写：{title_text} = {configs[matched_key]}（配置键：{matched_key}）")
-            else:
-                auto_filled_all = False
-                print(f"❌ 找到配置但未定位到输入框，需手动填写：{title_text}")
-        else:
-            auto_filled_all = False
-            print(f"❌ 无匹配配置，需手动填写：{title_text}")
-        index += 2
-
-    # 金数据提交（你原有的提交按钮XPath）
-    submit_xpath = '/html/body/div[1]/div/div/form/div[4]/div/button'
-    if auto_filled_all:
-        print("准备提交...")
-        explicit_click_xpath(driver, submit_xpath)
-        print("提交成功！")
-        time.sleep(3)
-    return auto_filled_all
-
-
-# ---------------------- wjx自动化逻辑（适配问卷星结构） ----------------------
-def auto_fill_wjx(driver, configs):
-    print("\n📌 识别到问卷星链接，开始自动化填写...")
-    # 手动定位存放所有项目标题的父节点（你原有的XPath）
-    parent_container_xpath = '/html/body/div[3]/form/div[10]/div[4]/fieldset'
-    parent_container = explicit_find_xpath(driver, parent_container_xpath)
-    if not parent_container:
-        raise Exception("未找到表单字段容器，请检查父节点XPath")
-
-    index = 1  # 起始索引（你原有的逻辑）
-    auto_filled_all = True
-    while True:
-        # 定位当前索引的字段容器（如div[2]、div[4]）
-        field_container_xpath = f'{parent_container_xpath}/div[{index}]'
-        field_container = explicit_find_xpath(driver, field_container_xpath)
-        if not field_container:
-            print("\n所有字段已遍历完成")
-            break
-
-        # 提取当前字段的标题（你原有的绝对路径）
-        title_xpath = f'{field_container_xpath}/div[1]/div[2]'
-        title_element = explicit_find_xpath(driver, title_xpath)
-        if not title_element:
-            print(f"容器div[{index}]未找到标题，跳过")
-            auto_filled_all = False
-            index += 1
-            continue
-        title_text = title_element.text.strip()
-        if not title_text:
-            print(f"容器div[{index}]标题为空，跳过")
-            auto_filled_all = False
-            index += 1
-            continue
-
-        print(f"\n发现字段：{title_text}（容器索引：{index}）")
-
-        # 双向模糊匹配配置（你原有的匹配逻辑）
-        matched_key = None
-        for config_key in configs:
-            if (title_text in config_key) or (config_key in title_text):
-                matched_key = config_key
-                break
-
-        # 填写逻辑（你原有的输入框定位）
-        if matched_key and configs[matched_key]:
-            input_xpath = f'{field_container_xpath}//input'
-            input_element = explicit_find_xpath(driver, input_xpath)
-            if input_element:
-                input_element.send_keys(configs[matched_key])
-                print(f"✅ 已自动填写：{title_text} = {configs[matched_key]}（配置键：{matched_key}）")
-            else:
-                auto_filled_all = False
-                print(f"❌ 找到配置但未定位到输入框，需手动填写：{title_text}")
-        else:
-            auto_filled_all = False
-            print(f"❌ 无匹配配置，需手动填写：{title_text}")
-        index += 1
-
-    # 问卷星隐私条款勾选（标准结构）
     try:
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(0.5)
-        # 优先点击label（兼容问卷星标准结构）
-        privacy_xpath = '//label[@for="checkxiexi"]'
-        privacy = explicit_find_xpath(driver, privacy_xpath)
-        if privacy:
-            explicit_click_xpath(driver, privacy_xpath)
-            print("✅ 已勾选隐私条款")
-    except Exception as e:
-            print(f"❌ 勾选隐私条款失败：{str(e)}")
-            auto_filled_all = False
+        # 等待父容器加载并获取所有符合条件的父容器（按页面顺序）
+        WebDriverWait(driver, 5).until(EC.presence_of_element_located(('xpath', parent_xpath)))
+        parent_containers = driver.find_elements('xpath', parent_xpath)
+    except TE:
+        print("❌ 未找到任何符合特征的表单父容器")
+        return False
 
+    if not parent_containers:
+        print("❌ 表单父容器列表为空")
+        return False
+    print(f"✅ 共识别到 {len(parent_containers)} 个表单字段父容器")
 
-    # 问卷星提交按钮（通用定位）
-    submit_xpath = '//div[@id="ctlNext" and contains(@class, "submitbtn")]'
-    if auto_filled_all:
-        print("准备提交...")
-        explicit_click_xpath(driver, submit_xpath)
-        print("提交成功！")
-        time.sleep(3)
-    return auto_filled_all
+    # ---------------------- 2. 遍历每个父容器，提取标题+匹配输入框 ----------------------
+    for group_idx, parent in enumerate(parent_containers, 1):
+        print(f"\n=== 处理第 {group_idx} 个字段组 ===")
 
-
-# ---------------------- jsjform自动化逻辑 ----------------------
-
-def auto_fill_jsjform(driver, configs):
-    print("\n📌 识别到金数据链接，开始自动化填写...")
-    # 手动定位存放所有项目标题的父节点（你原有的XPath）
-    parent_container_xpath = '/html/body/div[2]/div[2]/div[1]/form/div/div[2]'
-    parent_container = explicit_find_xpath(driver, parent_container_xpath)
-    if not parent_container:
-        raise Exception("未找到表单字段容器，请检查父节点XPath")
-
-    index = 1  # 起始索引（你原有的逻辑）
-    auto_filled_all = True
-    while True:
-        # 定位当前索引的字段容器（如div[2]、div[4]）
-        field_container_xpath = f'{parent_container_xpath}/div[{index}]'
-        field_container = explicit_find_xpath(driver, field_container_xpath)
-        if not field_container:
-            print("\n所有字段已遍历完成")
-            break
-
-        # 提取当前字段的标题（你原有的绝对路径）
-        title_xpath = f'{field_container_xpath}/div[1]'
-        title_element = explicit_find_xpath(driver, title_xpath)
-        if not title_element:
-            print(f"容器div[{index}]未找到标题，跳过")
-            auto_filled_all = False
-            index += 1
-            continue
-        title_text = title_element.text.strip()
+        # 2.1 提取标题：父容器文本直接作为标题（按你的要求，父容器文本只有标题）
+        title_text = parent.text.strip()
         if not title_text:
-            print(f"容器div[{index}]标题为空，跳过")
+            print("⚠️ 该父容器无标题文本，跳过")
             auto_filled_all = False
-            index += 1
+            continue
+        print(f"字段标题：{title_text}")
+
+        # 2.2 父容器内找输入框（严格按你的XPath规则）
+        try:
+            # 仅在当前父容器内定位输入框（相对定位 .//）
+            input_ele = parent.find_element(
+                'xpath',
+                ".//input[@type='text' or @type='tel']"
+            )
+        except Exception:
+            # 无对应输入框，直接跳过
+            print("❌ 该字段无文本输入框，跳过")
+            auto_filled_all = False
             continue
 
-        print(f"\n发现字段：{title_text}（容器索引：{index}）")
-
-        # 双向模糊匹配配置（你原有的匹配逻辑）
+        # 2.3 双向模糊匹配配置（保留你原有的逻辑）
         matched_key = None
+        clean_title = re.sub(r'[:：*★☆\s]+', '', title_text)  # 仅清洗特殊字符，不过滤内容
         for config_key in configs:
-            if (title_text in config_key) or (config_key in title_text):
+            clean_config = re.sub(r'[:：*★☆\s]+', '', config_key.strip())
+            if (clean_title in clean_config) or (clean_config in clean_title):
                 matched_key = config_key
                 break
 
-        # 填写逻辑（你原有的输入框定位）
+        # 2.4 填写输入框
         if matched_key and configs[matched_key]:
-            input_xpath = f'{field_container_xpath}//input'
-            input_element = explicit_find_xpath(driver, input_xpath)
-            if input_element:
-                input_element.send_keys(configs[matched_key])
-                print(f"✅ 已自动填写：{title_text} = {configs[matched_key]}（配置键：{matched_key}）")
-            else:
+            try:
+                input_ele.clear()  # 清空原有内容
+                input_ele.send_keys(configs[matched_key])
+                print(f"✅ 已自动填写：{title_text} = {configs[matched_key]}")
+            except Exception as e:
                 auto_filled_all = False
-                print(f"❌ 找到配置但未定位到输入框，需手动填写：{title_text}")
+                print(f"❌ 填写失败：{title_text}（原因：{str(e)[:50]}）")
         else:
             auto_filled_all = False
             print(f"❌ 无匹配配置，需手动填写：{title_text}")
-        index += 1
 
-    # 金数据提交按钮（通用定位）
-    submit_xpath = '//button[@type="submit" and @data-type="primary" and .//span[text()="提交"]]'
+    # ---------------------- 3. 手动提交提示 ----------------------
+    print("\n" + "-" * 50)
     if auto_filled_all:
-        print("准备提交...")
-        explicit_click_xpath(driver, submit_xpath)
-        print("提交成功！")
-        time.sleep(3)
-    return auto_filled_all
+        print("✅ 所有可匹配的文本字段已自动填写完成！")
+    else:
+        print("⚠️ 部分字段已自动填写，剩余字段需您手动完善")
+    print("📢 请您手动检查并点击提交按钮完成表单提交")
+    print("-" * 50)
 
+    return auto_filled_all
 
 # ---------------------- 主流程（URL识别+分流执行） ----------------------
 if __name__ == '__main__':
@@ -325,13 +189,12 @@ if __name__ == '__main__':
         driver.get(url)
         print(f"已打开表单：{url}")
 
-        # 识别表单类型（不区分大小写）
-        if "jsj.top" in url.lower():
-            auto_filled_all = auto_fill_jsjtop(driver, configs)
-        elif "wjx" in url.lower():
-            auto_filled_all = auto_fill_wjx(driver, configs)
-        elif "jsjform" in url.lower():
-            auto_filled_all = auto_fill_jsjform(driver, configs)
+        # 识别表单类型（不区分大小写）- 优化点：简化重复判断，统一执行逻辑
+        url_lower = url.lower()
+        auto_filled_all = False
+        # 合并支持的域名特征，简化判断
+        if any(key in url_lower for key in ["jsj.top", "wjx", "jsjform"]):
+            auto_filled_all = auto_fill_generic(driver, configs)
         else:
             print("❌ 当前表单链接不支持！目前支持的表单链接包括：")
             print("1.https://xxxx.jsjform.com/x/xxxxxx")
@@ -339,7 +202,6 @@ if __name__ == '__main__':
             print("3.https://wjx.cn/xx/xxx")
             print("4.https://wjx.top/xx/xxx")
             print("您可以通过 ctrl+s 保存当前网页结构，后续再增加新的表单自动化逻辑")
-            auto_filled_all = False
 
         # 统一等待Esc键关闭浏览器
         if auto_filled_all:
