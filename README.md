@@ -32,7 +32,7 @@
 #### （1）安装 Python 依赖
 ```bash
 pip install selenium pyperclip pyyaml
-
+```
 #### （2）配置 ChromeDriver
 1. 查看 Chrome 浏览器版本（设置 → 关于 Chrome）
 2. 下载对应版本的 ChromeDriver：[ChromeDriver 官网](https://sites.google.com/chromium.org/driver/)
